@@ -1,0 +1,120 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+data = {
+    'Date': pd.date_range(start='2024-01-01', periods=180, freq='D'),
+    'Product_Category': ['Laptops']*30 + ['Smartphones']*30 + ['Tablets']*30 + ['Accessories']*30 + ['Smartwatches']*30 + ['Headphones']*30,
+    'Sales_Amount': [15000 + (x * 500) for x in range(30)] + [20000 + (x * 600) for x in range(30)] + [12000 + (x * 400) for x in range(30)] + [8000 + (x * 300) for x in range(30)] + [10000 + (x * 350) for x in range(30)] + [7000 + (x * 200) for x in range(30)],
+    'Units_Sold': [100 + (x * 5) for x in range(30)] + [120 + (x * 6) for x in range(30)] + [90 + (x * 4) for x in range(30)] + [50 + (x * 3) for x in range(30)] + [70 + (x * 2) for x in range(30)] + [60 + (x * 2) for x in range(30)]
+}
+
+df = pd.DataFrame(data)
+  
+print(df.head())
+print(df.describe())
+total_sales = df['Sales_Amount'].sum()
+print(f'Total Sales: ${total_sales:,.2f}')
+
+total_transactions = df['Units_Sold'].sum()
+avg_transaction_value = df['Sales_Amount'].sum() / total_transactions
+print(f'Total Transactions: {total_transactions}')
+print(f'Average Transaction Value: ${avg_transaction_value:.2f}')
+
+plt.figure(figsize=(14, 7))
+plt.plot(df['Date'], df['Sales_Amount'], marker='o', linestyle='-', color='b')
+plt.title('Sales Amount Over Time')
+plt.xlabel('Date')
+plt.ylabel('Sales Amount ($)')
+plt.grid(True)
+plt.show()
+
+category_sales = df.groupby('Product_Category').agg({'Sales_Amount': 'sum', 'Units_Sold': 'sum'})
+
+plt.figure(figsize=(12, 6))
+sns.barplot(x=category_sales.index, y=category_sales['Sales_Amount'], palette='viridis')
+plt.title('Sales by Product Category')
+plt.xlabel('Product Category')
+plt.ylabel('Sales Amount ($)')
+plt.show()
+  
+df['Month'] = df['Date'].dt.to_period('M')
+
+monthly_sales = df.groupby('Month').agg({'Sales_Amount': 'sum', 'Units_Sold': 'sum'})
+
+plt.figure(figsize=(14, 7))
+monthly_sales['Sales_Amount'].plot(kind='bar', color='teal')
+plt.title('Monthly Sales Trends')
+plt.xlabel('Month')
+plt.ylabel('Sales Amount ($)')
+plt.xticks(rotation=45)
+plt.grid(True)
+plt.show()
+
+demographics_data = {
+    'Age_Group': ['18-24', '25-34', '35-44', '45-54', '55+'],
+    'Percentage_of_Sales': [15, 35, 30, 10, 10]
+}
+
+demographics_df = pd.DataFrame(demographics_data)
+
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Age_Group', y='Percentage_of_Sales', data=demographics_df, palette='pastel')
+plt.title('Sales by Customer Demographics')
+plt.xlabel('Age Group')
+plt.ylabel('Percentage of Total Sales (%)')
+plt.show()
+
+channel_data = {
+    'Channel': ['In-Store', 'Online'],
+    'Sales_Amount': [600000, 400000]
+}
+
+channel_df = pd.DataFrame(channel_data)
+
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Channel', y='Sales_Amount', data=channel_df, palette='coolwarm')
+plt.title('Sales by Sales Channel')
+plt.xlabel('Channel')
+plt.ylabel('Sales Amount ($)')
+plt.show()
+
+best_selling_products = {
+    'Product': ['Laptop A', 'Smartphone X', 'Tablet Y', 'Headphone Z', 'Smartwatch M'],
+    'Sales_Amount': [300000, 250000, 150000, 100000, 90000]
+}
+
+best_selling_df = pd.DataFrame(best_selling_products)
+  
+plt.figure(figsize=(12, 7))
+sns.barplot(x='Product', y='Sales_Amount', data=best_selling_df, palette='viridis')
+plt.title('Top 5 Best-Selling Products')
+plt.xlabel('Product')
+plt.ylabel('Sales Amount ($)')
+plt.xticks(rotation=45)
+plt.show()
+
+feedback_data = {
+    'Aspect': ['Product Quality', 'Customer Service', 'Store Atmosphere', 'Online Experience'],
+    'Positive_Feedback (%)': [75, 70, 65, 60],
+    'Negative_Feedback (%)': [10, 15, 20, 25]
+}
+
+feedback_df = pd.DataFrame(feedback_data)
+
+feedback_df.set_index('Aspect').plot(kind='bar', stacked=True, figsize=(12, 7), color=['lightgreen', 'lightcoral'])
+plt.title('Customer Feedback Summary')
+plt.xlabel('Feedback Aspect')
+plt.ylabel('Percentage (%)')
+plt.show()
+recommendations = [
+    'Increase Online Sales Efforts',
+    'Expand Best-Selling Products',
+    'Target Age Group 25-34',
+    'Improve Customer Feedback Areas',
+    'Leverage Seasonal Trends'
+]
+
+print('Recommendations:')
+for rec in recommendations:
+    print(f'- {rec}')
