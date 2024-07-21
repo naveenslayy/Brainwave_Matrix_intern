@@ -1,0 +1,76 @@
+import getpass
+users = {
+    '123456': {'pin': '1234', 'balance': 1000.0},
+    '654321': {'pin': '4321', 'balance': 500.0}
+}
+
+def display_menu():
+    print("\nATM Menu")
+    print("1. Check Balance")
+    print("2. Deposit Cash")
+    print("3. Withdraw Cash")
+    print("4. Exit")
+
+def check_balance(account_number):
+    balance = users[account_number]['balance']
+    print(f"Your current balance is: ${balance:.2f}")
+
+def deposit_cash(account_number):
+    while True:
+        try:
+            amount = float(input("Enter amount to deposit: $"))
+            if amount <= 0:
+                raise ValueError("Amount must be greater than 0.")
+            users[account_number]['balance'] += amount
+            print(f"Deposited ${amount:.2f}. New balance is ${users[account_number]['balance']:.2f}.")
+            break
+        except ValueError as e:
+            print(f"Invalid input: {e}")
+
+def withdraw_cash(account_number):
+    while True:
+        try:
+            amount = float(input("Enter amount to withdraw: $"))
+            if amount <= 0:
+                raise ValueError("Amount must be greater than 0.")
+            if amount > users[account_number]['balance']:
+                raise ValueError("Insufficient funds.")
+            users[account_number]['balance'] -= amount
+            print(f"Withdrew ${amount:.2f}. New balance is ${users[account_number]['balance']:.2f}.")
+            break
+        except ValueError as e:
+            print(f"Invalid input: {e}")
+
+def atm_system():
+    print("Welcome to the ATM")
+    
+    account_number = input("Enter your account number: ")
+    if account_number not in users:
+        print("Account number not found.")
+        return
+    
+    pin = getpass.getpass("Enter your PIN: ")
+    if pin != users[account_number]['pin']:
+        print("Incorrect PIN.")
+        return
+    
+    print("PIN correct. Accessing account...")
+    
+    while True:
+        display_menu()
+        choice = input("Choose an option (1-4): ")
+        
+        if choice == '1':
+            check_balance(account_number)
+        elif choice == '2':
+            deposit_cash(account_number)
+        elif choice == '3':
+            withdraw_cash(account_number)
+        elif choice == '4':
+            print("Thank you for using the ATM. Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please select a valid option (1-4).")
+
+if __name__ == "__main__":
+    atm_system()
