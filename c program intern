@@ -1,0 +1,115 @@
+#include <iostream>
+#include <unordered_map>
+#include <limits>
+#include <iomanip>
+
+using namespace std;
+
+class ATM {
+private:
+    unordered_map<string, pair<string, double>> users;
+    void displayMenu() {
+        cout << "\nATM Menu\n";
+        cout << "1. Check Balance\n";
+        cout << "2. Deposit Cash\n";
+        cout << "3. Withdraw Cash\n";
+        cout << "4. Exit\n";
+    }
+    void checkBalance(const string& accountNumber) {
+        double balance = users[accountNumber].second;
+        cout << "Your current balance is: $" << fixed << setprecision(2) << balance << endl;
+    }
+    void depositCash(const string& accountNumber) {
+        double amount;
+        while (true) {
+            cout << "Enter amount to deposit: $";
+            cin >> amount;
+            if (cin.fail() || amount <= 0) {
+                cin.clear(); // Clear the error flag
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard invalid input
+                cout << "Invalid input. Please enter a positive number.\n";
+            } else {
+                users[accountNumber].second += amount;
+                cout << "Deposited $" << fixed << setprecision(2) << amount << ". New balance is $" << fixed << setprecision(2) << users[accountNumber].second << endl;
+                break;
+            }
+        }
+    }
+    void withdrawCash(const string& accountNumber) {
+        double amount;
+        while (true) {
+            cout << "Enter amount to withdraw: $";
+            cin >> amount;
+            if (cin.fail() || amount <= 0) {
+                cin.clear(); // Clear the error flag
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Discard invalid input
+                cout << "Invalid input. Please enter a positive number.\n";
+            } else if (amount > users[accountNumber].second) {
+                cout << "Insufficient funds. Please enter a smaller amount.\n";
+            } else {
+                users[accountNumber].second -= amount;
+                cout << "Withdrew $" << fixed << setprecision(2) << amount << ". New balance is $" << fixed << setprecision(2) << users[accountNumber].second << endl;
+                break;
+            }
+        }
+    }
+
+public:
+    ATM() {
+        users["123456"] = make_pair("1234", 1000.0);
+        users["654321"] = make_pair("4321", 500.0);
+    }
+    void run() {
+        cout << "Welcome to the ATM\n";
+
+        string accountNumber;
+        cout << "Enter your account number: ";
+        cin >> accountNumber;
+
+        if (users.find(accountNumber) == users.end()) {
+            cout << "Account number not found.\n";
+            return;
+        }
+
+        string pin;
+        cout << "Enter your PIN: ";
+        cin >> pin;
+
+        if (users[accountNumber].first != pin) {
+            cout << "Incorrect PIN.\n";
+            return;
+        }
+
+        cout << "PIN correct. Accessing account...\n";
+
+        while (true) {
+            displayMenu();
+            int choice;
+            cout << "Choose an option (1-4): ";
+            cin >> choice;
+
+            switch (choice) {
+                case 1:
+                    checkBalance(accountNumber);
+                    break;
+                case 2:
+                    depositCash(accountNumber);
+                    break;
+                case 3:
+                    withdrawCash(accountNumber);
+                    break;
+                case 4:
+                    cout << "Thank you for using the ATM. Goodbye!\n";
+                    return;
+                default:
+                    cout << "Invalid choice. Please select a valid option (1-4).\n";
+            }
+        }
+    }
+};
+
+int main() {
+    ATM atm;
+    atm.run();
+    return 0;
+}
