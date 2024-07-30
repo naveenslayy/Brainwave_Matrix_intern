@@ -1,0 +1,63 @@
+import re
+import requests
+from bs4 import BeautifulSoup
+
+# Function to check if a URL is suspicious
+def is_suspicious_url(url):
+    # Check for common phishing patterns
+    suspicious_patterns = [
+        r'\b0x',                # Hexadecimal patterns
+        r'\b\d+\.\d+\.\d+\.\d+', # IP addresses
+        r'\b(?:[a-zA-Z0-9-]+\.){2,}[a-zA-Z]{2,}\b', # Multiple subdomains
+        r'@',                   # @ symbol in URL
+        r'\bfree\b',            # Keywords like 'free'
+        r'\boffer\b',
+        r'\bwin\b',
+        r'\bbonus\b'
+    ]
+
+    for pattern in suspicious_patterns:
+        if re.search(pattern, url):
+            return True
+    return False
+
+# Function to fetch URL content and analyze
+def fetch_and_analyze(url):
+    try:
+        response = requests.get(url, timeout=10)
+        content = response.content
+        soup = BeautifulSoup(content, 'html.parser')
+        
+        # Check for suspicious forms
+        forms = soup.find_all('form')
+        for form in forms:
+            if 'action' in form.attrs:
+                form_action = form.attrs['action']
+                if is_suspicious_url(form_action):
+                    return True, 'Suspicious form action detected'
+        
+        # Check for suspicious links
+        links = soup.find_all('a', href=True)
+        for link in links:
+            if is_suspicious_url(link['href']):
+                return True, 'Suspicious link detected'
+        
+        return False, 'No suspicious patterns detected'
+    
+    except requests.RequestException as e:
+        return True, f'Error fetching URL: {e}'
+
+# Main function
+def main():
+    url = input('Enter URL to scan: ')
+    if is_suspicious_url(url):
+        print('URL is suspicious based on pattern analysis.')
+    else:
+        suspicious, reason = fetch_and_analyze(url)
+        if suspicious:
+            print(f'URL is suspicious: {reason}')
+        else:
+            print('URL appears to be safe.')
+
+if __name__ == '__main__':
+    main()
