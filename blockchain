@@ -1,0 +1,122 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract Voting {
+    struct Candidate {
+        uint id;
+        string name;
+        uint voteCount;
+    }
+
+    mapping(address => bool) public voters;
+    mapping(uint => Candidate) public candidates;
+    uint public candidatesCount;
+
+    event votedEvent(uint indexed candidateId);
+
+    constructor() {
+        addCandidate("Alice");
+        addCandidate("Bob");
+    }
+
+    function addCandidate(string memory _name) private {
+        candidatesCount++;
+        candidates[candidatesCount] = Candidate(candidatesCount, _name, 0);
+    }
+
+    function vote(uint _candidateId) public {
+        require(!voters[msg.sender], "Already voted.");
+        require(_candidateId > 0 && _candidateId <= candidatesCount, "Invalid candidate.");
+
+        voters[msg.sender] = true;
+        candidates[_candidateId].voteCount++;
+
+        emit votedEvent(_candidateId);
+    }
+}
+import React, { useEffect, useState } from 'react';
+import Web3 from 'web3';
+import Voting from './contracts/Voting.json';
+
+const VotingApp = () => {
+  const [account, setAccount] = useState('');
+  const [candidates, setCandidates] = useState([]);
+  const [hasVoted, setHasVoted] = useState(false);
+  const [contract, setContract] = useState(null);
+
+  useEffect(() => {
+    const loadWeb3 = async () => {
+      if (window.ethereum) {
+        window.web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+      } else if (window.web3) {
+        window.web3 = new Web3(window.web3.currentProvider);
+      } else {
+        window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!');
+      }
+    };
+
+    const loadBlockchainData = async () => {
+      const web3 = window.web3;
+      const accounts = await web3.eth.getAccounts();
+      setAccount(accounts[0]);
+
+      const networkId = await web3.eth.net.getId();
+      const networkData = Voting.networks[networkId];
+      if (networkData) {
+        const contract = new web3.eth.Contract(Voting.abi, networkData.address);
+        setContract(contract);
+
+        const candidatesCount = await contract.methods.candidatesCount().call();
+        const candidatesList = [];
+        for (let i = 1; i <= candidatesCount; i++) {
+          const candidate = await contract.methods.candidates(i).call();
+          candidatesList.push(candidate);
+        }
+        setCandidates(candidatesList);
+
+        const voter = await contract.methods.voters(accounts[0]).call();
+        setHasVoted(voter);
+      } else {
+        window.alert('Voting contract not deployed to detected network.');
+      }
+    };
+
+    loadWeb3();
+    loadBlockchainData();
+  }, []);
+
+  const vote = async (candidateId) => {
+    await contract.methods.vote(candidateId).send({ from: account });
+    setHasVoted(true);
+  };
+
+  return (
+    <div>
+      <h2>Voting DApp</h2>
+      <p>Your account: {account}</p>
+      <ul>
+        {candidates.map((candidate) => (
+          <li key={candidate.id}>
+            {candidate.name} - {candidate.voteCount} votes
+            {!hasVoted && <button onClick={() => vote(candidate.id)}>Vote</button>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default VotingApp;
+import React from 'react';
+import VotingApp from './Voting';
+
+const App = () => {
+  return (
+    <div className="App">
+      <VotingApp />
+    </div>
+  );
+};
+
+export default App;
