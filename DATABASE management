@@ -1,0 +1,100 @@
+CREATE TABLE Publishers (
+    PublisherID INT PRIMARY KEY AUTO_INCREMENT,
+    PublisherName VARCHAR(100) NOT NULL,
+    Address VARCHAR(255),
+    Phone VARCHAR(20)
+);
+
+CREATE TABLE Categories (
+    CategoryID INT PRIMARY KEY AUTO_INCREMENT,
+    CategoryName VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE Books (
+    BookID INT PRIMARY KEY AUTO_INCREMENT,
+    Title VARCHAR(255) NOT NULL,
+    ISBN VARCHAR(20) NOT NULL UNIQUE,
+    PublisherID INT,
+    CategoryID INT,
+    PublishedYear INT,
+    Pages INT,
+    FOREIGN KEY (PublisherID) REFERENCES Publishers(PublisherID),
+    FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID)
+);
+
+CREATE TABLE Authors (
+    AuthorID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(100) NOT NULL,
+    LastName VARCHAR(100) NOT NULL,
+    BirthDate DATE
+);
+
+CREATE TABLE Members (
+    MemberID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(100) NOT NULL,
+    LastName VARCHAR(100) NOT NULL,
+    Address VARCHAR(255),
+    Phone VARCHAR(20),
+    Email VARCHAR(100),
+    JoinDate DATE NOT NULL
+);
+
+CREATE TABLE Staff (
+    StaffID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(100) NOT NULL,
+    LastName VARCHAR(100) NOT NULL,
+    Position VARCHAR(100),
+    HireDate DATE NOT NULL
+);
+
+CREATE TABLE Loans (
+    LoanID INT PRIMARY KEY AUTO_INCREMENT,
+    BookID INT,
+    MemberID INT,
+    StaffID INT,
+    LoanDate DATE NOT NULL,
+    DueDate DATE NOT NULL,
+    ReturnDate DATE,
+    FOREIGN KEY (BookID) REFERENCES Books(BookID),
+    FOREIGN KEY (MemberID) REFERENCES Members(MemberID),
+    FOREIGN KEY (StaffID) REFERENCES Staff(StaffID)
+);
+
+CREATE TABLE BookAuthors (
+    BookID INT,
+    AuthorID INT,
+    PRIMARY KEY (BookID, AuthorID),
+    FOREIGN KEY (BookID) REFERENCES Books(BookID),
+    FOREIGN KEY (AuthorID) REFERENCES Authors(AuthorID)
+);
+-- Publishers
+INSERT INTO Publishers (PublisherName, Address, Phone) VALUES ('Penguin Books', '375 Hudson St, New York, NY 10014, USA', '212-366-2000');
+INSERT INTO Publishers (PublisherName, Address, Phone) VALUES ('HarperCollins', '195 Broadway, New York, NY 10007, USA', '212-207-7000');
+
+-- Categories
+INSERT INTO Categories (CategoryName) VALUES ('Fiction');
+INSERT INTO Categories (CategoryName) VALUES ('Non-Fiction');
+
+-- Books
+INSERT INTO Books (Title, ISBN, PublisherID, CategoryID, PublishedYear, Pages) VALUES ('The Great Gatsby', '9780743273565', 1, 1, 1925, 180);
+INSERT INTO Books (Title, ISBN, PublisherID, CategoryID, PublishedYear, Pages) VALUES ('To Kill a Mockingbird', '9780061120084', 2, 1, 1960, 281);
+
+-- Authors
+INSERT INTO Authors (FirstName, LastName, BirthDate) VALUES ('F. Scott', 'Fitzgerald', '1896-09-24');
+INSERT INTO Authors (FirstName, LastName, BirthDate) VALUES ('Harper', 'Lee', '1926-04-28');
+
+-- Members
+INSERT INTO Members (FirstName, LastName, Address, Phone, Email, JoinDate) VALUES ('John', 'Doe', '123 Main St, Springfield, IL', '555-1234', 'john.doe@example.com', '2023-01-01');
+INSERT INTO Members (FirstName, LastName, Address, Phone, Email, JoinDate) VALUES ('Jane', 'Smith', '456 Oak St, Springfield, IL', '555-5678', 'jane.smith@example.com', '2023-02-15');
+
+-- Staff
+INSERT INTO Staff (FirstName, LastName, Position, HireDate) VALUES ('Alice', 'Johnson', 'Librarian', '2022-05-01');
+INSERT INTO Staff (FirstName, LastName, Position, HireDate) VALUES ('Bob', 'Williams', 'Assistant Librarian', '2023-01-10');
+
+-- Loans
+INSERT INTO Loans (BookID, MemberID, StaffID, LoanDate, DueDate, ReturnDate) VALUES (1, 1, 1, '2023-03-01', '2023-03-15', NULL);
+INSERT INTO Loans (BookID, MemberID, StaffID, LoanDate, DueDate, ReturnDate) VALUES (2, 2, 2, '2023-03-02', '2023-03-16', '2023-03-14');
+
+-- BookAuthors
+INSERT INTO BookAuthors (BookID, AuthorID) VALUES (1, 1);
+INSERT INTO BookAuthors (BookID, AuthorID) VALUES (2, 2);
